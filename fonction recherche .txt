@@ -1,0 +1,78 @@
+||code foction recherche en utilisant le textchang||
+ 
+void Mainwindow::on_Recherche_textChanged(const QString &arg1)
+{
+    qDebug() << arg1;
+
+    Connection m_db;
+    if (!m_db.connOpen())
+    {
+        qDebug() << "Failed to open database";
+        return;
+    }
+
+    // Recherche dans la table "Visiteur"
+    QSqlQuery requVisiteur;
+    requVisiteur.exec("SELECT count(*) FROM Visiteur WHERE nom LIKE '%" + arg1 + "%' OR NumeroVisiteur LIKE '%" + arg1 + "%'");
+
+    if (requVisiteur.next())
+    {
+        if (requVisiteur.value(0).toInt() == 0)
+        {
+            QMessageBox::warning(this, "Visiteur introuvable", "Le visiteur que vous avez saisi n'existe pas ou a déjà été supprimé.");
+
+            QStandardItemModel *headerModel = new QStandardItemModel(0, 3);
+            headerModel->setHorizontalHeaderLabels(QStringList() << "Nom" << "Adresse" << "Provenance");
+            ui->visiteurTable->setModel(headerModel);
+
+            ui->modifVisteurBtn->setDisabled(true);
+            ui->SupVisiteurBtn->setDisabled(true);
+        }
+        else
+        {
+            model = new QSqlQueryModel();
+            model->setQuery("SELECT * FROM Visiteur WHERE nom LIKE '%" + arg1 + "%' OR NumeroVisiteur LIKE '%" + arg1 + "%'");
+            model->setHeaderData(0, Qt::Horizontal, tr("Nom"));
+            model->setHeaderData(1, Qt::Horizontal, tr("Adresse"));
+            model->setHeaderData(2, Qt::Horizontal, tr("Provenance"));
+            ui->visiteurTable->setStyleSheet("QHeaderView::section {background-color:#76D2D1}");
+            ui->visiteurTable->setModel(model);
+
+            ui->modifVisteurBtn->setDisabled(true);
+            ui->SupVisiteurBtn->setDisabled(true);
+        }
+    }
+
+    // Recherche dans la table "Site"
+    QSqlQuery requSite;
+    requSite.exec("SELECT count(*) FROM Site WHERE nom LIKE '%" + arg1 + "%' OR NumeroSite LIKE '%" + arg1 + "%'");
+
+    if (requSite.next())
+    {
+        if (requSite.value(0).toInt() == 0)
+        {
+            QMessageBox::warning(this, "Site introuvable", "Le site que vous avez saisi n'existe pas ou a déjà été supprimé.");
+
+            QStandardItemModel *headerModel = new QStandardItemModel(0, 3); // 3 colonnes pour votre cas
+            headerModel->setHorizontalHeaderLabels(QStringList() << "Nom" << "Lieux" << "Tarife Journalier");
+
+            ui->tableSite->setModel(headerModel);
+
+            ui->ModifSiteBtn->setDisabled(true);
+            ui->SuppSite->setDisabled(true);
+        }
+        else
+        {
+            model = new QSqlQueryModel();
+            model->setQuery("SELECT * FROM Site WHERE nom LIKE '%" + arg1 + "%' OR NumeroSite LIKE '%" + arg1 + "%'");
+            model->setHeaderData(0, Qt::Horizontal, tr("Nom"));
+            model->setHeaderData(1, Qt::Horizontal, tr("Lieux"));
+            model->setHeaderData(2, Qt::Horizontal, tr("Tarife Journalier"));
+            ui->tableSite->setStyleSheet("QHeaderView::section {background-color:#76D2D1}");
+            ui->tableSite->setModel(model);
+
+            ui->ModifSiteBtn->setDisabled(true);
+            ui->SuppSite->setDisabled(true);
+        }
+    }
+}
